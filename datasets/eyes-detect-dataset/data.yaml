@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['Eye']
+
+roboflow:
+  workspace: valerio-ponzi
+  project: eyes3.0
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/valerio-ponzi/eyes3.0/dataset/2
