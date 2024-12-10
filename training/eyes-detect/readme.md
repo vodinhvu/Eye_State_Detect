@@ -1,18 +1,19 @@
-# Train the YOLOv8 Model
+# Ultralytics YOLO Training for Eye Detection
 
-You can train the YOLOv8 model on any machine with the required environment. For detailed usage and steps, refer to the official Ultralytics documentation:
+Train the Ultralytics YOLO model (version v11n) for eye detection to ensure optimal performance on NVIDIA Jetson Nano devices. To achieve the best results, we recommend running the training on an NVIDIA GPU server.
 
-- [Training YOLOv8 Documentation](https://docs.ultralytics.com/modes/train/#usage-examples)
+For detailed instructions on training YOLOv11n, refer to the official Ultralytics documentation:
+
+- [Training YOLO Documentation](https://docs.ultralytics.com/modes/train/#usage-examples)
 
 ---
 
-# Export the Model to TensorRT
+# Exporting to TensorRT for Deployment
 
-After training the model, export it to TensorRT for optimized deployment on NVIDIA Jetson devices.
+After training, export the YOLOv11n model for eye detection to TensorRT for optimized deployment on the NVIDIA Jetson Nano. Use the official Ultralytics YOLO Docker image to streamline the export process.
 
-- [Export to TensorRT Guide](https://docs.ultralytics.com/guides/nvidia-jetson/#use-tensorrt-on-nvidia-jetson)  
+- [Export to TensorRT Guide](https://docs.ultralytics.com/guides/nvidia-jetson/#use-tensorrt-on-nvidia-jetson)
 
- **Note:** You must export the model on the device where you plan to run the TensorRT model for deployment.
+**Note:** Ensure the export is performed on the target NVIDIA Jetson Nano device for deployment.
 
-
-
+---

@@ -1,117 +1,106 @@
 
-# Eye State Detection  
+# **Eye State Detection**
 
-This project is designed to detect the state of a person's eyes (open or closed) using a deep learning model running on a **Jetson Nano**.  
+A compact, real-time system to detect whether a person’s eyes are open or closed. Designed for NVIDIA Jetson Nano, this project uses YOLO for eye detection and a PyTorch classifier for state classification.
 
-## Features  
-- **Real-time Eye State Detection**: Processes video input to classify eye states as open or closed.  
-- **YOLOv8 for Eye Detection**: Locates eyes in the video frames.  
-- **PyTorch-based Eye State Classifier**: Classifies detected eyes as open or closed.  
-- **Optimized for Jetson Nano**: Designed for resource-constrained environments.  
-- **Training Scripts Included**: Includes code to train the YOLOv8 detection model and the eye state classifier.  
+---
 
-## Requirements  
-### Hardware  
-- Jetson Nano Developer Kit  
-- Camera (e.g., USB or Raspberry Pi camera module)  
+## **Features**
+- **Real-time Detection**: Detect and classify eye states from video feeds.  
+- **Pretrained Models**: Includes YOLOv11 and MobileNetV2 for efficient performance.  
+- **End-to-End Training Pipeline**: Train detection and classification models with ease.  
 
-### Software  
-- JetPack SDK (version 4.6 or later)  
-- Python 3.8+  
-- Docker (optional but recommended)  
+---
 
-### Dependencies  
-Install the necessary libraries via `requirements.txt`:  
-```bash  
-pip install -r requirements.txt  
-```  
+## **Use Case**
+This project is designed for **driver drowsiness detection**. By running the eye state detection system on the **NVIDIA Jetson Nano Kit**, the system monitors the driver’s eyes in real time. If the driver’s eyes are detected as closed for a prolonged period, indicating that they may have fallen asleep, the system can trigger an alarm to alert the driver and prevent potential accidents.
 
-### Major Libraries  
-- `torch`, `torchvision` (PyTorch and vision models)  
-- `ultralytics` (YOLOv8)  
-- `opencv-python`  
+While this setup is compact, efficient, and optimized for the Jetson Nano, it is still under development and requires further optimization for real-world deployment. Additional work is needed to improve the system’s accuracy, responsiveness, and robustness to ensure it is ready for production use in vehicles.
 
-## Project Structure  
-```plaintext  
-├── config/  
-│   ├── settings.yml              # Configuration file (e.g., dataset URLs, parameters)  
-├── src/                          # Code for inference and running the application  
-│   ├── main.py                   # Entry point of the application  
-│   ├── detector.py               # YOLOv8 detection logic  
-│   ├── eye_classifier.py         # Classifies the state of eyes  
-│   ├── utils.py                  # Utility functions  
-├── datasets/                     # Folder for datasets (downloaded automatically)  
-├── models/                       # Folder to store trained models  
-│   ├── yolov8/                   # Pretrained YOLOv8 model files  
-│   ├── torchvision/              # Pretrained eye state classification model files  
-├── training/                     # Folder for training scripts  
-│   ├── yolov8/                   # Code for training YOLOv8 eye detection model  
-│   │   ├── train.py              # Script to train YOLOv8 model  
-│   │   ├── config.yaml           # YOLOv8 training configuration  
-│   │   ├── dataset/              # Folder for YOLOv8 dataset preparation  
-│   │       ├── annotations/      # Annotation files for training  
-│   │       ├── images/           # Image files for training  
-│   └── eye_classification/       # Code for training the eye state classifier  
-│       ├── train_classifier.py   # Training script for eye state classification  
-│       ├── model.py              # Torchvision-based model definition  
-│       ├── dataset.py            # Dataset loader and preprocessing logic  
-│       ├── config.yml            # Configuration for training the classifier  
-├── requirements.txt              # Python dependencies  
-└── README.md                     # Project documentation  
-```  
+---
 
-## Setup  
-1. Clone the repository:  
-   ```bash  
-   git clone https://github.com/yourusername/eye-state-detection.git  
-   cd eye-state-detection  
-   ```  
+## **Requirements**
 
-2. Install dependencies:  
-   ```bash  
-   pip install -r requirements.txt  
-   ```  
+### **Hardware**
+- NVIDIA Jetson Nano  
+- Camera (USB or Raspberry Pi)
 
-3. Prepare the datasets:  
-   - For YOLOv8: Place images and annotations in the `training/yolov8/dataset/` folder.  
-   - For the classifier: Organize datasets for open and closed eye states in the format expected by `train_classifier.py`.  
+### **Software**
+- **JetPack SDK 4.6**  
+- **Python 3.8** (Ensure Python 3.8 is installed on Jetson Nano)
 
-## Training  
-### Train YOLOv8 Model  
-1. Navigate to the YOLOv8 training folder:  
-   ```bash  
-   cd training/yolov8  
-   ```  
-2. Start training:  
-   ```bash  
-   python train.py --config config.yaml  
-   ```  
+---
 
-### Train Eye State Classifier  
-1. Navigate to the classifier training folder:  
-   ```bash  
-   cd training/eye_classification  
-   ```  
-2. Start training:  
-   ```bash  
-   python train_classifier.py --config config.yml  
-   ```  
+## **Project Structure**
+```plaintext
+├── datasets                   # Datasets for detection and classification
+│   ├── eyes-detect-dataset    # Dataset for eye detection
+│   └── eyes-state-dataset     # Dataset for eye state classification
+├── Dockerfile                 # Docker configuration
+├── Readme.md                  # Documentation
+├── requirements.txt           # Python dependencies
+├── src                        # Source code for the application
+│   └── main.py
+├── training                   # Model training and exported models
+│   ├── eyes-detect            # Eye detection model training folder
+│   └── eye-state              # Eye state classification model training folder
+```
 
-## Running Inference  
-Run the application using the pretrained models:  
-```bash  
-python src/main.py  
-```  
+---
 
-## Deployment with Docker  
-1. Build the Docker image:  
-   ```bash  
-   docker build -t eye-state-detection .  
-   ```  
-2. Run the container:  
-   ```bash  
-   docker run --rm --runtime nvidia -v $(pwd):/app eye-state-detection  
-   ```  
+## **Setup**
 
-## Acknowledgments  
-This project utilizes NVIDIA Jetson Nano, YOLOv8, and PyTorch to deliver lightweight and efficient AI solutions.  
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/vodinhvu/Eye_State_Detect.git
+   cd eye-state-detection
+   ```
+
+2. **Install dependencies**:  
+   You can either:
+   - **Run with host Python 3.8**:
+     Install the required dependencies using `pip`:
+     ```bash
+     pip install -r requirements.txt
+     ```
+   
+   - **Use Docker** (recommended for a consistent environment):
+     Build the Docker image and run the container:
+     ```bash
+     docker build -t eye-state-detection .
+     docker run --rm -it --runtime nvidia eye-state-detection /bin/bash
+     ```
+
+---
+
+## **Training**
+
+### **Prepare Datasets**
+
+Before training, ensure the datasets are set up:
+- **Eye Detection Dataset**: For instructions on how to download and set up the detection dataset, refer to [datasets/eyes-detect-dataset/readme.md](datasets/eyes-detect-dataset/readme.md).
+- **Eye State Classification Dataset**: For instructions on how to download and set up the eye state classification dataset, refer to [datasets/eyes-state-dataset/readme.md](datasets/eyes-state-dataset/readme.md).
+
+### **Training Instructions**
+
+For detailed instructions on how to train each model, refer to the `README.md` files inside the respective training directories:
+
+- **Detection Model**: [training/eyes-detect/readme.md](training/eyes-detect/readme.md)
+- **Eye State Classifier**: [training/eye-state/readme.md](training/eye-state/readme.md)
+
+The training process is designed to be performed on a server with an NVIDIA GPU, not on the Jetson Nano.
+
+---
+
+## **Inference**
+
+The inference is designed to run on NVIDIA Jetson Nano using the pretrained models. To run the application, simply execute:
+```bash
+python src/main.py
+```
+
+---
+
+## **Acknowledgments**
+
+This project utilizes NVIDIA Jetson Nano, YOLOv11, and MobileNetV2 for efficient AI-powered eye state detection.

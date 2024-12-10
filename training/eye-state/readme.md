@@ -1,32 +1,34 @@
-# Train YOLO Detection Model with TorchVision & Export to TensorRT
+# Image Classification with TorchVision & Exporting to TensorRT
 
-This folder contains instructions and relevant documentation links for training a YOLO detection model using TorchVision and exporting it using the provided `export_engine.py`.
-
----
-
-## Train the YOLO Detection Model
-
-You can train the YOLO detection model using **TorchVision** based on the reference code from PyTorch's official GitHub repository.
-
-- Reference code: [TorchVision GitHub Classification Examples](https://github.com/pytorch/vision/tree/main/references/classification)
+This folder contains instructions for training an **image classification model** using **TorchVision** and exporting it to **TensorRT** for deployment on an **NVIDIA Jetson Nano**.
 
 ---
 
-## Export the Model to TensorRT
+## 1. Train the Model
 
-Once you have trained your model, export it to TensorRT using the script provided in this directory: `export_engine.py`.  
+Use **TorchVision** to train the image classification model. For efficiency, it's recommended to train a **MobileNetV2** model, which is lightweight and suitable for deployment on resource-constrained devices like the **NVIDIA Jetson Nano**.
 
-**Note:** You should run this export on the device where you intend to deploy the TensorRT model.
+- Reference: [TorchVision GitHub Classification Examples](https://github.com/pytorch/vision/tree/main/references/classification)
 
-# Additional Notes
-1. **Training Flexibility**:
-    You can train the model on any machine with the required PyTorch environment set up.
+**Training Environment:**  
+Train on an **NVIDIA GPU server** with the latest **TorchVision** version. However, ensure compatibility with the export environment, as the latest version of **TorchVision** may not be supported for export to **TensorRT**.
 
-2. **Export Dependencies**:
-Ensure that TensorRT and CUDA are configured on the target deployment environment when running the export_engine.py.
+---
 
+## 2. Export to TensorRT
 
+After training, use the `export_engine.py` script to export the model to **TensorRT**. This process must be done on the same device where the model will be deployed (i.e., the **NVIDIA Jetson Nano**).
 
+**Deployment Environment:**  
+Because the **Jetson Nano** has limited resources compared to an **NVIDIA GPU server**, exporting a smaller model like **MobileNetV2** ensures optimal performance during deployment.
 
+**Compatibility Note:**  
+Ensure that both the **training** and **export** environments use compatible versions of **TorchVision** for smooth export to **TensorRT**.
 
+---
 
+## Additional Notes
+
+- **Training:** Performed on an **NVIDIA GPU server** with the latest **TorchVision** version.
+- **Export:** Must be done on the **NVIDIA Jetson Nano** with **TensorRT** and **CUDA** configured properly.
+- **Performance:** For the **Jetson Nano**, choose a lightweight model like **MobileNetV2** to ensure optimal performance during deployment.
