@@ -1,26 +1,31 @@
 import argparse
 import json
 import pathlib
+from typing import Union
 
 import onnx
+import onnxruntime as ort
 import tensorrt as trt
 import torch
 import torchvision
 
+torch.set_grad_enabled(False)
 
-def load_model(file: str | pathlib.Path, device: str = 'cuda'):
-    info = torch.load(file, map_location=torch.device('cpu'), weights_only=False)
+
+def load_model(file: Union[str, pathlib.Path], device: str = 'cuda'):
+    info = torch.load(file, map_location=torch.device('cpu'))
     model = torchvision.models.MobileNetV2(num_classes=2)
-    model.load_state_dict(info.get('models'))
+    model.load_state_dict(info['model'])
     model.to(device=device)
     pytorch_total_params = sum(p.numel() for p in model.parameters())
     print('Pytorch total params:', pytorch_total_params)
     return model
 
 
-def export_onnx(model: torch.nn.Module, input_sample: torch.Tensor, save_file: str | pathlib.Path):
+def export_onnx(model: torch.nn.Module, input_sample: torch.Tensor, save_file: Union[str, pathlib.Path]):
     # Export to Onnx
-    torch.onnx.export(model, input_sample, save_file, verbose=True, opset_version=14, do_constant_folding=True,
+    torch.onnx.export(model.cpu(), input_sample.cpu(), save_file, verbose=True, opset_version=14,
+                      # do_constant_folding=True,
                       # WARNING: DNN inference with torch>=1.12 may require do_constant_folding=False
                       input_names=['images'], output_names=['output0'], dynamic_axes=None, )
     # Add meta data
@@ -33,7 +38,7 @@ def export_onnx(model: torch.nn.Module, input_sample: torch.Tensor, save_file: s
     onnx.save(model_onnx, save_file)
 
 
-def onnx_to_engine(input_file: str | pathlib.Path, output_file: str | pathlib.Path, half: bool = True):
+def onnx_to_engine(input_file: Union[str, pathlib.Path], output_file: Union[str, pathlib.Path], half: bool = True):
     print(f'Starting export with TensorRT {trt.__version__}...')
     logger = trt.Logger(trt.Logger.INFO)
     # Engine builder
@@ -45,7 +50,7 @@ def onnx_to_engine(input_file: str | pathlib.Path, output_file: str | pathlib.Pa
 
     # Read ONNX file
     trt_parser = trt.OnnxParser(network, logger)
-    if not trt_parser.parse_from_file(input_file):
+    if not trt_parser.parse_from_file(str(input_file)):
         raise RuntimeError(f'failed to load ONNX file: {input_file}')
 
     # Network inputs
@@ -70,7 +75,7 @@ def onnx_to_engine(input_file: str | pathlib.Path, output_file: str | pathlib.Pa
         t.write(engine.serialize())
 
 
-def run_engine(file: str | pathlib.Path, input_sample: torch.Tensor):
+def run_engine(file: Union[str, pathlib.Path], input_sample: torch.Tensor):
     logger = trt.Logger(trt.Logger.INFO)
 
     with open(file, 'rb') as f, trt.Runtime(logger) as runtime:
@@ -96,8 +101,9 @@ def run_engine(file: str | pathlib.Path, input_sample: torch.Tensor):
     print('Tensorrt output shape', output_shape)
 
     input_sample = input_sample.to(device='cuda')
-    output = torch.zeros(size=output_shape, device='cuda')
+    output = torch.zeros(*output_shape, device='cuda')
     context.execute_v2([int(input_sample.data_ptr()), int(output.data_ptr())])
+
     return output
 
 
@@ -111,15 +117,24 @@ if __name__ == '__main__':
     if not model_file.exists():
         raise 'Error input model file.'
 
-    # torch to onnx
-    onnx_file = model_file.with_suffix('.onnx')
+    # torch model
     torch_model = load_model(file=model_file, device='cuda')
     input_tensor = torch.randn(1, 3, args.input_size, args.input_size, device='cuda')
+    print('Random input shape:', input_tensor.shape)
+    pytorch_output = torch_model(input_tensor)
+    print("pytorch output:", pytorch_output)
+
+    # torch to onnx
+    onnx_file = model_file.with_suffix('.onnx')
     export_onnx(model=torch_model, input_sample=input_tensor, save_file=onnx_file)
+    ort_sess = ort.InferenceSession(str(onnx_file))
+    onnx_output = ort_sess.run(None, {'images': input_tensor.cpu().numpy()})
+    print('Onnx output:', onnx_output)
 
     # onnx to tensorrt engine
     engine_file = model_file.with_suffix('.engine')
     onnx_to_engine(input_file=onnx_file, output_file=engine_file)
 
     # test engine
-    run_engine(file=engine_file, input_sample=input_tensor)
+    engine_output = run_engine(file=engine_file, input_sample=input_tensor)
+    print('tensorrt engine output:', engine_output)
