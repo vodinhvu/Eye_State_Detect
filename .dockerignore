@@ -1,0 +1,7 @@
+.idea
+.git
+config
+datasets/
+notebook/
+rsync_exclude.txt
+.gitignore
