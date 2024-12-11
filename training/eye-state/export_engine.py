@@ -12,19 +12,20 @@ import torchvision
 torch.set_grad_enabled(False)
 
 
-def load_model(file: Union[str, pathlib.Path], device: str = 'cuda'):
+def load_model(model: str, file: Union[str, pathlib.Path], device: str = 'cuda'):
     info = torch.load(file, map_location=torch.device('cpu'))
-    model = torchvision.models.MobileNetV2(num_classes=2)
+    model = torchvision.models.__dict__[model](num_classes=2, pretrained=False)
     model.load_state_dict(info['model'])
     model.to(device=device)
     pytorch_total_params = sum(p.numel() for p in model.parameters())
+    model.eval()
     print('Pytorch total params:', pytorch_total_params)
     return model
 
 
 def export_onnx(model: torch.nn.Module, input_sample: torch.Tensor, save_file: Union[str, pathlib.Path]):
     # Export to Onnx
-    torch.onnx.export(model.cpu(), input_sample.cpu(), save_file, verbose=True, opset_version=14,
+    torch.onnx.export(model.cpu(), input_sample.cpu(), save_file, verbose=False, opset_version=11,
                       # do_constant_folding=True,
                       # WARNING: DNN inference with torch>=1.12 may require do_constant_folding=False
                       input_names=['images'], output_names=['output0'], dynamic_axes=None, )
@@ -109,31 +110,39 @@ def run_engine(file: Union[str, pathlib.Path], input_sample: torch.Tensor):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Eye state detect', add_help=True)
-    parser.add_argument('--model', type=str, required=True, help='Path to pytorch model checkpoint.')
+    parser.add_argument('--model', type=str, required=True, help='Name of model')
+    parser.add_argument('--checkpoint', type=str, required=True, help='Path to pytorch model checkpoint.')
     parser.add_argument('--input-size', type=int, default=128, help='Size of input image.')
     args = parser.parse_args()
 
-    model_file = pathlib.Path(args.model)
-    if not model_file.exists():
+    model_checkpoint = pathlib.Path(args.checkpoint)
+    if not model_checkpoint.exists():
         raise 'Error input model file.'
 
     # torch model
-    torch_model = load_model(file=model_file, device='cuda')
+    torch_model = load_model(model=args.model, file=model_checkpoint, device='cuda')
     input_tensor = torch.randn(1, 3, args.input_size, args.input_size, device='cuda')
     print('Random input shape:', input_tensor.shape)
     pytorch_output = torch_model(input_tensor)
     print("pytorch output:", pytorch_output)
 
     # torch to onnx
-    onnx_file = model_file.with_suffix('.onnx')
-    export_onnx(model=torch_model, input_sample=input_tensor, save_file=onnx_file)
+    onnx_file = model_checkpoint.with_suffix('.onnx')
+    if not onnx_file.exists():
+        export_onnx(model=torch_model, input_sample=input_tensor, save_file=onnx_file)
+    else:
+        print(f'Use exists onnx model file {onnx_file}.')
+
     ort_sess = ort.InferenceSession(str(onnx_file))
     onnx_output = ort_sess.run(None, {'images': input_tensor.cpu().numpy()})
     print('Onnx output:', onnx_output)
 
     # onnx to tensorrt engine
-    engine_file = model_file.with_suffix('.engine')
-    onnx_to_engine(input_file=onnx_file, output_file=engine_file)
+    engine_file = model_checkpoint.with_suffix('.engine')
+    if not engine_file.exists():
+        onnx_to_engine(input_file=onnx_file, output_file=engine_file)
+    else:
+        print(f'Use exists tensorrt engine file: {engine_file}')
 
     # test engine
     engine_output = run_engine(file=engine_file, input_sample=input_tensor)
