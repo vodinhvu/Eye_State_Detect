@@ -81,7 +81,7 @@ This project is designed for **driver drowsiness detection**. The system monitor
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/vodinhvu/Eye_State_Detect.git
-   cd eye-state-detection
+   cd Eye_State_Detect/
    ```
 
 ---
@@ -91,21 +91,28 @@ This project is designed for **driver drowsiness detection**. The system monitor
 ### **Option 1: Using Docker (Recommended)**
 
 Ensure the camera is connected to `/dev/video0` and start the system using Docker:  
-```bash
-docker run --rm --device /dev/video0 --runtime nvidia -p 8000:8000 eye-state-detection
-```
+1. **Build the Docker Image**:
+   If you haven't already built the Docker image, run the following command to build it:
+   ```bash
+   docker build -t eye-state-detection .
+   ```
+2. **Run the System Using Docker**: After the image is built, start the system using Docker:
+
+   ```bash
+   docker run --rm --device /dev/video0 --runtime nvidia -p 8000:8000 eye-state-detection
+   ```
 
 ### **Option 2: Using Host Python**
 
-Install the required dependencies:
-```bash
-pip install -r requirements.txt
-```
+1. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Run the application:
-```bash
-python src/main.py
-```
+2. Run the application:
+   ```bash
+   python src/main.py
+   ```
 
 The FastAPI WebView is automatically started alongside the main application.
 
