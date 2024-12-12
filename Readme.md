@@ -1,4 +1,3 @@
-
 # **Eye State Detection**
 
 A compact, real-time system designed for NVIDIA Jetson Nano to detect whether a person’s eyes are open or closed. This project integrates YOLO for eye detection and a PyTorch-based classifier for state classification, with a WebView to visualize real-time results using FastAPI.
@@ -31,6 +30,20 @@ This project is designed for **driver drowsiness detection**. The system monitor
    - **If any eye is detected as closed**: Trigger a warning to the driver.  
 4. **WebView Visualization**: Display real-time detection and classification results in a web interface powered by FastAPI.  
 5. **Real-time Processing**: This process is repeated continuously to ensure timely alerts.  
+
+---
+
+## **Limitations and Optimization Opportunities**
+
+### **Limitations**
+- **MobileNetV2 Accuracy**: While MobileNetV2 offers efficient classification, it sometimes misclassifies the eye state due to its lightweight architecture.  
+- **Memory Constraints**: The NVIDIA Jetson Nano’s limited memory restricts the use of larger, more accurate models.
+- **Single Client Stream Limitation**: FastAPI can only serve a video stream to one client at a time, which limits scalability for multiple viewers.
+
+### **Planned Optimizations**
+1. **Model Compression**: Optimize larger models (e.g., EfficientNet or ResNet) using techniques like quantization or pruning to make them compatible with Jetson Nano.
+2. **RTSP Server Setup**: Integrate an RTSP server to handle multiple concurrent video streams, allowing scalability for real-time visualization across multiple clients.
+> **Discussion Point:** If you have suggestions for other optimization strategies, please share your ideas.
 
 ---
 
@@ -135,4 +148,5 @@ This project utilizes:
 - **NVIDIA Jetson Nano** for edge computing.  
 - **YOLOv11** for eye detection.  
 - **MobileNetV2** for efficient eye state classification.  
-- **FastAPI** for serving the WebView.  
+- **FastAPI** for serving the WebView.
+
