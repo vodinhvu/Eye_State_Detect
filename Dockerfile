@@ -1,4 +1,4 @@
-FROM ultralytics/ultralytics:latest-jetson-jetpack4
+FROM ultralytics/ultralytics:8.3.48-jetson-jetpack4
 
 WORKDIR /eye-state-detect
 
